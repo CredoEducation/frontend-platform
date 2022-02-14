@@ -194,9 +194,11 @@ Create your pipeline job on Jenkins
 
   * Run the script that you try to create the jobs.
 
-    * Examples: `python transifex/pull.py https://github.com/edx/edx-platform.git edx/sustaining-team`.
+    * Examples: `python transifex/pull.py https://github.com/edx/edx-platform.git edx/sustaining-team`. You might be required to setup environment variable ``GITHUB_ACCESS_TOKEN`` with your personal github account.
 
-      * You might be required to setup environment variable ``GITHUB_ACCESS_TOKEN`` with your personal github account for `pull_translations`. It should try to create a pull request and merge it to the repo.
+      * For `push_translations`, you might also need transifex authentication. It is necessary to push first because you need transifex to be created before pull. If there are problems with transifex auth or priviledge, you should proceed to the next step and run push job once. 
+
+      * For `pull_translations`, it should try to create a pull request and merge it to the repo.
 
 #. Open a pull request with your change, then `open a devops ticket <https://openedx.atlassian.net/servicedesk/customer/portal/3>`_ requesting them to review your pull request and rerun the seed job. Only devops can merge pull requests in this repo.
 
