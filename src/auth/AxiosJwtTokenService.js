@@ -35,15 +35,18 @@ export default class AxiosJwtTokenService {
   }
 
   decodeJwtCookie() {
-    const cookieValue = this.cookies.get(this.tokenCookieName);
+    let jwtTokenRaw = this.cookies.get(this.tokenCookieName);
+    if (!jwtTokenRaw) {
+      jwtTokenRaw = sessionStorage.getItem(this.tokenCookieName)
+    }
 
-    if (cookieValue) {
+    if (jwtTokenRaw) {
       try {
-        return jwtDecode(cookieValue);
+        return jwtDecode(jwtTokenRaw);
       } catch (e) {
         const error = Object.create(e);
         error.message = 'Error decoding JWT token';
-        error.customAttributes = { cookieValue };
+        error.customAttributes = { jwtTokenRaw };
         throw error;
       }
     }
@@ -60,9 +63,13 @@ export default class AxiosJwtTokenService {
         try {
           try {
             axiosResponse = await this.httpClient.post(this.tokenRefreshEndpoint);
+
             // eslint-disable-next-line max-len
             if (axiosResponse.data && axiosResponse.data.response_epoch_seconds) {
               responseServerEpochSeconds = axiosResponse.data.response_epoch_seconds;
+            }
+            if (axiosResponse.data && axiosResponse.data.jwt_header_and_payload) {
+              sessionStorage.setItem(this.tokenCookieName, axiosResponse.data.jwt_header_and_payload);
             }
           } catch (error) {
             processAxiosErrorAndThrow(error);
@@ -73,6 +80,7 @@ export default class AxiosJwtTokenService {
             // Clean up the cookie if it exists to eliminate any situation
             // where the cookie is not expired but the jwt is expired.
             this.cookies.remove(this.tokenCookieName);
+            sessionStorage.removeItem(this.tokenCookieName);
             const decodedJwtToken = null;
             return decodedJwtToken;
           }
