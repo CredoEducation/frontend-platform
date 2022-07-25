@@ -1,6 +1,7 @@
 import Cookies from 'universal-cookie';
 import jwtDecode from 'jwt-decode';
 import axios from 'axios';
+import AxiosProxy from './AxiosProxy';
 import { logFrontendAuthError, processAxiosErrorAndThrow } from './utils';
 import createRetryInterceptor from './interceptors/createRetryInterceptor';
 
@@ -62,7 +63,8 @@ export default class AxiosJwtTokenService {
         let axiosResponse;
         try {
           try {
-            axiosResponse = await this.httpClient.post(this.tokenRefreshEndpoint);
+            const httpClientProxy = new AxiosProxy(this.httpClient);
+            axiosResponse = await httpClientProxy.post(this.tokenRefreshEndpoint);
 
             // eslint-disable-next-line max-len
             if (axiosResponse.data && axiosResponse.data.response_epoch_seconds) {

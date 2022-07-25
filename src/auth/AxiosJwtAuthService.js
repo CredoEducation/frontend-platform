@@ -2,6 +2,7 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import { logFrontendAuthError } from './utils';
 import { camelCaseObject, ensureDefinedConfig } from '../utils';
+import AxiosProxy from './AxiosProxy';
 import createJwtTokenProviderInterceptor from './interceptors/createJwtTokenProviderInterceptor';
 import createCsrfTokenProviderInterceptor from './interceptors/createCsrfTokenProviderInterceptor';
 import createProcessAxiosRequestErrorInterceptor from './interceptors/createProcessAxiosRequestErrorInterceptor';
@@ -82,14 +83,14 @@ class AxiosJwtAuthService {
    * @param {boolean} [options.useCache] Whether to use front end caching for all requests made
    * with the returned client.
    *
-   * @returns {HttpClient} A configured axios http client which can be used for authenticated
+   * @returns {AxiosProxy} A configured axios http client which can be used for authenticated
    * requests.
    */
   getAuthenticatedHttpClient(options = {}) {
     if (options.useCache) {
-      return this.cachedAuthenticatedHttpClient;
+      return new AxiosProxy(this.cachedAuthenticatedHttpClient);
     }
-    return this.authenticatedHttpClient;
+    return new AxiosProxy(this.authenticatedHttpClient);
   }
 
   /**
@@ -98,13 +99,13 @@ class AxiosJwtAuthService {
    * @param {Object} [options] Optional options for how the HTTP client should be configured.
    * @param {boolean} [options.useCache] Whether to use front end caching for all requests made
    * with the returned client.
-   * @returns {HttpClient} A configured axios http client.
+   * @returns {AxiosProxy} A configured axios http client.
    */
   getHttpClient(options = {}) {
     if (options.useCache) {
-      return this.cachedHttpClient;
+      return new AxiosProxy(this.cachedHttpClient);
     }
-    return this.httpClient;
+    return new AxiosProxy(this.httpClient);
   }
 
   /**
