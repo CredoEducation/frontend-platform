@@ -77,6 +77,10 @@ let config = {
  * @returns {ConfigDocument}
   */
 export function getConfig() {
+  const { hostname } = global.location;
+  if (hostname.indexOf('frame') !== -1 && hostname.indexOf('credocourseware') !== -1) {
+    return { ...config, LMS_BASE_URL: 'https://frame.credocourseware.com' };
+  }
   return config;
 }
 
