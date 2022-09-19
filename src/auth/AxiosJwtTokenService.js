@@ -38,7 +38,7 @@ export default class AxiosJwtTokenService {
   decodeJwtCookie() {
     let jwtTokenRaw = this.cookies.get(this.tokenCookieName);
     if (!jwtTokenRaw) {
-      jwtTokenRaw = sessionStorage.getItem(this.tokenCookieName)
+      jwtTokenRaw = sessionStorage.getItem(this.tokenCookieName);
     }
 
     if (jwtTokenRaw) {
@@ -64,7 +64,23 @@ export default class AxiosJwtTokenService {
         try {
           try {
             const httpClientProxy = new AxiosProxy(this.httpClient);
-            axiosResponse = await httpClientProxy.post(this.tokenRefreshEndpoint);
+            let passedEmail = null;
+
+            if (global.location.search !== '') {
+              const tmpUrl = new URL(global.location.href);
+              const email = tmpUrl.searchParams.get('email');
+              if (email) {
+                passedEmail = email;
+              }
+            }
+
+            if (passedEmail) {
+              axiosResponse = await httpClientProxy.post(this.tokenRefreshEndpoint, {
+                email: passedEmail,
+              });
+            } else {
+              axiosResponse = await httpClientProxy.post(this.tokenRefreshEndpoint);
+            }
 
             // eslint-disable-next-line max-len
             if (axiosResponse.data && axiosResponse.data.response_epoch_seconds) {
@@ -72,6 +88,9 @@ export default class AxiosJwtTokenService {
             }
             if (axiosResponse.data && axiosResponse.data.jwt_header_and_payload) {
               sessionStorage.setItem(this.tokenCookieName, axiosResponse.data.jwt_header_and_payload);
+              if (global.location.hostname.endsWith('proxy.lirn.net') && axiosResponse.data.email) {
+                global.location.href = `${global.location.protocol}//learning-frame.credocourseware.com${global.location.pathname}?email=${axiosResponse.data.email}`;
+              }
             }
           } catch (error) {
             processAxiosErrorAndThrow(error);
