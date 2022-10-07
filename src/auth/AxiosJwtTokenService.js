@@ -3,6 +3,7 @@ import jwtDecode from 'jwt-decode';
 import axios from 'axios';
 import AxiosProxy from './AxiosProxy';
 import { logFrontendAuthError, processAxiosErrorAndThrow } from './utils';
+import { isBrokenProxyUsage } from '../utils';
 import createRetryInterceptor from './interceptors/createRetryInterceptor';
 
 export default class AxiosJwtTokenService {
@@ -88,7 +89,7 @@ export default class AxiosJwtTokenService {
             }
             if (axiosResponse.data && axiosResponse.data.jwt_header_and_payload) {
               sessionStorage.setItem(this.tokenCookieName, axiosResponse.data.jwt_header_and_payload);
-              if (global.location.hostname.endsWith('proxy.lirn.net') && axiosResponse.data.email) {
+              if (isBrokenProxyUsage() && axiosResponse.data.email) {
                 global.location.href = `${global.location.protocol}//learning-frame.credocourseware.com${global.location.pathname}?email=${axiosResponse.data.email}`;
               }
             }
