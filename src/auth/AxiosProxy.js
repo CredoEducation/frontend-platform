@@ -5,8 +5,10 @@ export default class AxiosProxy {
       'localhost',
       'nimblywise.test',
       'credocourseware.test',
+      'weaveeducation.test',
       'nimblywise.com',
       'credocourseware.com',
+      'weaveeducation.com',
     ];
   }
 

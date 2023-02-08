@@ -137,3 +137,12 @@ NOTE: As of this writing, i18n is _not_ configurable.  The `initialize()` functi
 When making changes to frontend-platform, be sure to manually run the included example app located in `./example`. The example app includes 2 routes to test for both unauthenticated and authenticated users. To start the example app, run `npm start` from the root directory.
 
 If you want to test changes to frontend-platform against a micro-frontend locally, follow the directions here: https://github.com/edx/frontend-build#local-module-configuration-for-webpack
+
+# Local package build
+
+```shell
+make build
+cd dist
+npm pack
+cp edx-frontend-platform-1.0.x.tgz ../packages
+```
