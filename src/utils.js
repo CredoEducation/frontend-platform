@@ -165,3 +165,5 @@ export function ensureDefinedConfig(object, requester) {
     }
   });
 }
+
+export const isBrokenProxyUsage = () => global.location.hostname.endsWith('proxy.lirn.net') || global.location.hostname.endsWith('idm.oclc.org');

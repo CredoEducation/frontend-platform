@@ -1,7 +1,7 @@
 {
   "name": "@edx/frontend-platform",
-  "version": "1.0.0-semantically-released",
-  "description": "Foundational application framework for Open edX micro-frontend applications.",
+  "version": "1.0.7",
+  "description": "Fork of the openEdx frontend-platform project.",
   "main": "index.js",
   "publishConfig": {
     "access": "public"
@@ -23,14 +23,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openedx/frontend-platform.git"
+    "url": "git+https://github.com/weaveeducation/frontend-platform.git"
   },
   "author": "edX",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/openedx/frontend-platform/issues"
+    "url": "https://github.com/weaveeducation/frontend-platform/issues"
   },
-  "homepage": "https://github.com/openedx/frontend-platform#readme",
+  "homepage": "https://github.com/weaveeducation/frontend-platform#readme",
   "devDependencies": {
     "@edx/brand": "npm:@edx/brand-openedx@1.2.0",
     "@edx/browserslist-config": "1.1.1",

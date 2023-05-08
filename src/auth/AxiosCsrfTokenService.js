@@ -1,4 +1,5 @@
 import axios from 'axios';
+import AxiosProxy from './AxiosProxy';
 import { getUrlParts, processAxiosErrorAndThrow } from './utils';
 
 export default class AxiosCsrfTokenService {
@@ -35,7 +36,8 @@ export default class AxiosCsrfTokenService {
     }
 
     if (!this.csrfTokenRequestPromises[domain]) {
-      this.csrfTokenRequestPromises[domain] = this.httpClient
+      const httpClientProxy = new AxiosProxy(this.httpClient);
+      this.csrfTokenRequestPromises[domain] = httpClientProxy
         .get(`${protocol}://${domain}${this.csrfTokenApiPath}`)
         .then((response) => {
           this.csrfTokenCache[domain] = response.data.csrfToken;

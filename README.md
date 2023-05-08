@@ -153,3 +153,14 @@ For any MFE built on top of the frontend-platform, the deployment strategy will 
 2. Copy the contents of dist/ to a web server.
 
 3. Configure the platform to point at your MFE. (details on this coming soon)
+
+
+# Local package build
+
+```shell
+nvm use 16.14.0
+make build
+cd dist
+npm pack
+cp edx-frontend-platform-1.0.x.tgz ../packages
+```

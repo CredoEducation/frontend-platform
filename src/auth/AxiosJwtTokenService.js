@@ -1,7 +1,9 @@
 import Cookies from 'universal-cookie';
 import jwtDecode from 'jwt-decode';
 import axios from 'axios';
+import AxiosProxy from './AxiosProxy';
 import { logFrontendAuthError, processAxiosErrorAndThrow } from './utils';
+import { isBrokenProxyUsage } from '../utils';
 import createRetryInterceptor from './interceptors/createRetryInterceptor';
 
 export default class AxiosJwtTokenService {
@@ -35,15 +37,18 @@ export default class AxiosJwtTokenService {
   }
 
   decodeJwtCookie() {
-    const cookieValue = this.cookies.get(this.tokenCookieName);
+    let jwtTokenRaw = this.cookies.get(this.tokenCookieName);
+    if (!jwtTokenRaw) {
+      jwtTokenRaw = sessionStorage.getItem(this.tokenCookieName);
+    }
 
-    if (cookieValue) {
+    if (jwtTokenRaw) {
       try {
-        return jwtDecode(cookieValue);
+        return jwtDecode(jwtTokenRaw);
       } catch (e) {
         const error = Object.create(e);
         error.message = 'Error decoding JWT token';
-        error.customAttributes = { cookieValue };
+        error.customAttributes = { jwtTokenRaw };
         throw error;
       }
     }
@@ -59,10 +64,34 @@ export default class AxiosJwtTokenService {
         let axiosResponse;
         try {
           try {
-            axiosResponse = await this.httpClient.post(this.tokenRefreshEndpoint);
+            const httpClientProxy = new AxiosProxy(this.httpClient);
+            let passedEmail = null;
+
+            if (global.location.search !== '') {
+              const tmpUrl = new URL(global.location.href);
+              const email = tmpUrl.searchParams.get('email');
+              if (email) {
+                passedEmail = email;
+              }
+            }
+
+            if (passedEmail) {
+              axiosResponse = await httpClientProxy.post(this.tokenRefreshEndpoint, {
+                email: passedEmail,
+              });
+            } else {
+              axiosResponse = await httpClientProxy.post(this.tokenRefreshEndpoint);
+            }
+
             // eslint-disable-next-line max-len
             if (axiosResponse.data && axiosResponse.data.response_epoch_seconds) {
               responseServerEpochSeconds = axiosResponse.data.response_epoch_seconds;
+            }
+            if (axiosResponse.data && axiosResponse.data.jwt_header_and_payload) {
+              sessionStorage.setItem(this.tokenCookieName, axiosResponse.data.jwt_header_and_payload);
+              if (isBrokenProxyUsage() && axiosResponse.data.email) {
+                global.location.href = `${global.location.protocol}//learning-frame.credocourseware.com${global.location.pathname}?email=${axiosResponse.data.email}`;
+              }
             }
           } catch (error) {
             processAxiosErrorAndThrow(error);
@@ -73,6 +102,7 @@ export default class AxiosJwtTokenService {
             // Clean up the cookie if it exists to eliminate any situation
             // where the cookie is not expired but the jwt is expired.
             this.cookies.remove(this.tokenCookieName);
+            sessionStorage.removeItem(this.tokenCookieName);
             const decodedJwtToken = null;
             return decodedJwtToken;
           }
