@@ -90,7 +90,11 @@ export default class AxiosJwtTokenService {
             if (axiosResponse.data && axiosResponse.data.jwt_header_and_payload) {
               sessionStorage.setItem(this.tokenCookieName, axiosResponse.data.jwt_header_and_payload);
               if (isBrokenProxyUsage() && axiosResponse.data.email) {
-                global.location.href = `${global.location.protocol}//learning-frame.credocourseware.com${global.location.pathname}?email=${axiosResponse.data.email}`;
+                let newFrameHost = 'learning-frame.credocourseware.com';
+                if (global.location.hostname.indexOf('learning-next') !== -1) {
+                  newFrameHost = 'learning-frame.next.credocourseware.com';
+                }
+                global.location.href = `${global.location.protocol}//${newFrameHost}${global.location.pathname}?email=${axiosResponse.data.email}`;
               }
             }
           } catch (error) {
